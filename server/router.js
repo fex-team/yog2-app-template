@@ -1,5 +1,3 @@
-var passport = require('yog-passport')();
-
 module.exports = function(router){
     // you can add app common logic here
     // router.use(function(req, res, next){

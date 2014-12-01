@@ -21,5 +21,4 @@
 
     {% endbody %}
 
-    {% require "{{-app_name-}}:page/layout.tpl" %}
 {% endhtml %}

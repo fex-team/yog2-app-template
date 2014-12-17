@@ -12,12 +12,12 @@ module.exports = function(router){
 
     // a restful api example
     router.route('/book')
-        // PUT /{{-app_name-}}/book/id
+        // PUT /{{-app_name-}}/book
         .put(router.action('book').put)
         // GET /{{-app_name-}}/book
         .get(router.action('book'));
 
-    router.route('/book/id/:id')
+    router.route('/book/:id')
         // GET /{{-app_name-}}/book/id
         .get(router.action('book').get)
         // DELETE /{{-app_name-}}/book/id

@@ -18,8 +18,8 @@ module.exports = function(router){
         .get(router.action('book'));
 
     router.route('/book/:id')
-        // GET /{{-app_name-}}/book/id
+        // GET /{{-app_name-}}/book/1
         .get(router.action('book').get)
-        // DELETE /{{-app_name-}}/book/id
+        // DELETE /{{-app_name-}}/book/1
         .delete(router.action('book').delete);
 };

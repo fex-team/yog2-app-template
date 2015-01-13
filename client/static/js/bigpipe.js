@@ -5,6 +5,8 @@
 
     var d = document;
     var head = d.getElementsByTagName('head')[0];
+    var loadedRes = {};
+    var loadingRes = {};
 
     // get broswer info
     var browser = (function() {
@@ -18,18 +20,32 @@
 
     // load Js and excute it.
     // 加载 JS 并执行它。
-    function loadJs(url, cb) {
+    function loadJs(url, ignoreDuplicate, cb) {
+        if (ignoreDuplicate && loadedRes[url]){
+            cb && cb();
+            return;
+        }
+        if (ignoreDuplicate && loadingRes[url]){
+            loadingRes[url].push(cb);
+            return;
+        }
+        loadingRes[url] = loadingRes[url] || [];
         var script = d.createElement('script');
         var loaded = false;
         var wrap = function() {
             if (loaded) {
                 return;
             }
-
             loaded = true;
+            loadedRes[url] = true;
+            if (ignoreDuplicate){
+                for (var i = 0; i < loadingRes[url].length; i++) {
+                    loadingRes[url][i] && loadingRes[url][i]();
+                }
+                loadingRes[url] = null;
+            }
             cb && cb();
         };
-
         script.setAttribute('src', url);
         script.setAttribute('type', 'text/javascript');
         script.onload = script.onerror = wrap;
@@ -39,7 +55,16 @@
 
     // load css and apply it.
     // 加载 css, 并应用该样式。
-    function loadCss(url, cb) {
+    function loadCss(url, ignoreDuplicate, cb) {
+        if (ignoreDuplicate && loadedRes[url]){
+            cb && cb();
+            return;
+        }
+        if (ignoreDuplicate && loadingRes[url]){
+            loadingRes[url].push(cb);
+            return;
+        }
+        loadingRes[url] = loadingRes[url] || [];
         var link = d.createElement('link');
         link.type = 'text/css';
         link.rel = 'stylesheet';
@@ -59,7 +84,14 @@
                 } catch (e) {
                     setTimeout(arguments.callee, 20);
                     return;
-                };
+                }
+                loadedRes[url] = true;
+                if (ignoreDuplicate){
+                    for (var i = 0; i < loadingRes[url].length; i++) {
+                        loadingRes[url][i] && loadingRes[url][i]();
+                    }
+                    loadingRes[url] = null;
+                }
                 cb();
             })();
         }
@@ -274,7 +306,7 @@
                 if (data.css && data.css.length) {
                     remaining = data.css.length;
                     for (var i = 0, len = remaining; i < len; i++) {
-                        Util.loadCss(data.css[i], function() {
+                        Util.loadCss(data.css[i], BigPipe.ignoreDuplicate, function() {
                             --remaining || insertDom();
                         });
                     }
@@ -336,7 +368,7 @@
                 }
 
                 for (i = 0; i < len; i++) {
-                    Util.loadJs(data.js[i], next && function() {
+                    Util.loadJs(data.js[i], BigPipe.ignoreDuplicate, next && function() {
                         --remaining || next();
                     });
                 }

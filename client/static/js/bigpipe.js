@@ -1,4 +1,4 @@
-(function(root) {
+(function (root) {
     // BigPipe 依赖的各种处理器
     // 可以通过此部分换成 [lazyrender](https://github.com/rgrove/lazyload/)，
     // 以达到更好的 js 并发下载性能。
@@ -9,7 +9,7 @@
     var loadingRes = {};
 
     // get broswer info
-    var browser = (function() {
+    var browser = (function () {
         var ua = navigator.userAgent.toLowerCase();
         var match = /(webkit)[ \/]([\w.]+)/.exec(ua) ||
             /(opera)(?:.*version)?[ \/]([\w.]+)/.exec(ua) ||
@@ -21,24 +21,24 @@
     // load Js and excute it.
     // 加载 JS 并执行它。
     function loadJs(url, ignoreDuplicate, cb) {
-        if (ignoreDuplicate && loadedRes[url]){
+        if (ignoreDuplicate && loadedRes[url]) {
             cb && cb();
             return;
         }
-        if (ignoreDuplicate && loadingRes[url]){
+        if (ignoreDuplicate && loadingRes[url]) {
             loadingRes[url].push(cb);
             return;
         }
         loadingRes[url] = loadingRes[url] || [];
         var script = d.createElement('script');
         var loaded = false;
-        var wrap = function() {
+        var wrap = function () {
             if (loaded) {
                 return;
             }
             loaded = true;
             loadedRes[url] = true;
-            if (ignoreDuplicate){
+            if (ignoreDuplicate) {
                 for (var i = 0; i < loadingRes[url].length; i++) {
                     loadingRes[url][i] && loadingRes[url][i]();
                 }
@@ -56,11 +56,11 @@
     // load css and apply it.
     // 加载 css, 并应用该样式。
     function loadCss(url, ignoreDuplicate, cb) {
-        if (ignoreDuplicate && loadedRes[url]){
+        if (ignoreDuplicate && loadedRes[url]) {
             cb && cb();
             return;
         }
-        if (ignoreDuplicate && loadingRes[url]){
+        if (ignoreDuplicate && loadingRes[url]) {
             loadingRes[url].push(cb);
             return;
         }
@@ -71,14 +71,14 @@
         link.href = url;
 
         if (browser === 'msie') {
-            link.onreadystatechange = function() {
+            link.onreadystatechange = function () {
                 /loaded|complete/.test(link.readyState) && cb();
             }
         } else if (browser === 'opera') {
             link.onload = cb;
         } else {
             // FF, Safari, Chrome
-            (function() {
+            (function () {
                 try {
                     link.sheet.cssRule;
                 } catch (e) {
@@ -86,7 +86,7 @@
                     return;
                 }
                 loadedRes[url] = true;
-                if (ignoreDuplicate){
+                if (ignoreDuplicate) {
                     for (var i = 0; i < loadingRes[url].length; i++) {
                         loadingRes[url][i] && loadingRes[url][i]();
                     }
@@ -98,6 +98,7 @@
 
         head.appendChild(link);
     }
+
 
     // eval js code.
     // 直接执行 js 代码。
@@ -129,12 +130,12 @@
     function ajax(url, cb, data) {
         var xhr = new(window.XMLHttpRequest || ActiveXObject)('Microsoft.XMLHTTP');
 
-        xhr.onreadystatechange = function() {
+        xhr.onreadystatechange = function () {
             if (this.readyState == 4) {
                 cb(this.responseText);
             }
         };
-        xhr.open(data ? 'POST' : 'GET', url + '&t=' + ~~(Math.random() * 1e6), true);
+        xhr.open(data ? 'POST' : 'GET', url + '&t=' + (new Date()).getTime(), true);
 
         if (data) {
             xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
@@ -168,7 +169,7 @@
     root.BigPipeUtil = Util;
 })(this);
 
-(function(root) {
+(function (root) {
     // Event
     var Util = root.BigPipeUtil,
         slice = [].slice,
@@ -176,7 +177,7 @@
 
     protos = {
 
-        on: function(name, callback) {
+        on: function (name, callback) {
             var me = this,
                 set, handler;
 
@@ -191,11 +192,11 @@
             return this;
         },
 
-        once: function(name, callback) {
+        once: function (name, callback) {
             var me = this,
                 once;
 
-            once = function() {
+            once = function () {
                 me.off(name, once);
                 return callback.apply(me, arguments);
             };
@@ -204,7 +205,7 @@
             return me.on(name, once);
         },
 
-        off: function(name, cb) {
+        off: function (name, cb) {
             var events = this._events;
 
             if (!name && !cb) {
@@ -212,14 +213,14 @@
                 return this;
             }
 
-            each(findHandlers(events, name, cb), function(item) {
+            each(findHandlers(events, name, cb), function (item) {
                 delete events[item.id];
             });
 
             return this;
         },
 
-        trigger: function(type) {
+        trigger: function (type) {
             var args, events, allEvents;
 
             if (!this._events || !type) {
@@ -236,8 +237,8 @@
     function findHandlers(arr, name, callback) {
         var ret = [];
 
-        each(arr, function(handler) {
-            if ( handler &&
+        each(arr, function (handler) {
+            if (handler &&
                 (!name || handler.e === name) &&
                 (!callback || handler.cb === callback || handler.cb._cb === callback)) {
                 ret.push(handler);
@@ -269,17 +270,17 @@
     }
 
     root.BigPipeEvent = Util.mixin({
-        mixto: function(obj) {
+        mixto: function (obj) {
             return Util.mixin(obj, protos);
         }
     }, protos);
 
 })(this);
 
-(function(root) {
+(function (root) {
     var Util = root.BigPipeUtil;
     var Event = root.BigPipeEvent;
-    var BigPipe = function() {
+    var BigPipe = function () {
 
         // The order of render pagelet.
         // - load css
@@ -301,21 +302,21 @@
         function PageLet(data, onDomInserted) {
             var remaining = 0;
 
-            var loadCss = function() {
+            var loadCss = function () {
                 // load css
                 if (data.css && data.css.length) {
                     remaining = data.css.length;
                     for (var i = 0, len = remaining; i < len; i++) {
-                        Util.loadCss(data.css[i], BigPipe.ignoreDuplicate, function() {
+                        Util.loadCss(data.css[i], BigPipe.ignoreDuplicate, function () {
                             --remaining || insertDom();
                         });
                     }
                 } else {
                     insertDom();
                 }
-            }
+            };
 
-            var insertDom = function() {
+            var insertDom = function () {
                 var i, len, dom, node, text, scriptText, temp;
 
                 // insert style code
@@ -340,15 +341,15 @@
                 }
 
                 onDomInserted();
-            }
+            };
 
-            var loadJs = function(callback) {
+            var loadJs = function (callback) {
                 var len = data.js && data.js.length;
                 var remaining = len,
                     i;
 
                 // exec data.scripts
-                var next = function() {
+                var next = function () {
                     var i, len;
 
                     // eval scripts.
@@ -368,11 +369,11 @@
                 }
 
                 for (i = 0; i < len; i++) {
-                    Util.loadJs(data.js[i], BigPipe.ignoreDuplicate, next && function() {
+                    Util.loadJs(data.js[i], BigPipe.ignoreDuplicate, next && function () {
                         --remaining || next();
                     });
                 }
-            }
+            };
 
             return {
                 loadCss: loadCss,
@@ -381,7 +382,10 @@
         }
 
         var count = 0,
-            pagelets = []; /* registered pagelets */
+            pagelets = [],
+            /* registered pagelets */
+            currentPagelet = null,
+            globalBigPipeLoadIndex = 0;
 
         return {
 
@@ -389,17 +393,17 @@
             //
             // - after chunk output pagelet.
             // - after async load quickling pagelet.
-            onPageletArrive: function(obj) {
+            onPageletArrive: function (obj) {
                 this.trigger('pageletarrive', obj);
 
-                var pagelet = PageLet(obj, function() {
+                var pagelet = PageLet(obj, function () {
                     var item;
 
                     // enforce js executed after dom inserted.
                     if (!--count) {
                         while ((item = pagelets.shift())) {
                             BigPipe.trigger('pageletinsert', pagelet, obj);
-                            item.loadJs(function() {
+                            item.loadJs(function () {
                                 BigPipe.trigger('pageletdone', pagelet, obj);
                             });
                         }
@@ -436,10 +440,11 @@
             //                    option the pagelet can be renndered in
             //                    specified document node.
             //   - extend
-            load: function(pagelets) {
+            load: function (pagelets) {
                 var args = [];
                 var currentPageUrl = location.href;
                 var containers = {};
+                var pageletRequestID = globalBigPipeLoadIndex++;
                 var obj, i, id, cb, remaining, search, url, param, container;
 
                 // convert arguments.
@@ -452,7 +457,7 @@
                 if (pagelets instanceof Array) {
                     obj = {
                         pagelets: pagelets
-                    }
+                    };
                 } else {
                     obj = typeof pagelets === 'string' ? {
                         pagelets: pagelets
@@ -478,21 +483,25 @@
                 }
 
                 BigPipe.on('pageletarrive', onPageArrive);
-                param = obj.param ? '&' + obj.param : '';
-                search = location.search;
-                search = search ? (search + '&') : '?';
-                url = (obj.url || '') + search + args.join('&') + param;
-
-                BigPipe.on('pageletdone', function() {
-                    if (!--remaining) {
-                        BigPipe.off('pageletdone', arguments.callee);
-                        BigPipe.off('pageletarrive', onPageArrive);
-                        obj.cb && obj.cb();
+                obj.search && args.push(obj.search);
+                if (obj.url) {
+                    url = obj.url + (obj.url.indexOf('?') === -1 ? '?' : '&') + args.join('&');
+                } else {
+                    url = (location.search ? location.search + '&' : '?') + args.join('&');
+                }
+                BigPipe.on('pageletdone', function () {
+                    if (currentPagelet === pageletRequestID) {
+                        remaining--;
+                        if (remaining === 0) {
+                            BigPipe.off('pageletdone', arguments.callee);
+                            BigPipe.off('pageletarrive', onPageArrive);
+                            obj.cb && obj.cb();
+                        }
                     }
                 });
 
-                Util.ajax(url, function(res) {
-
+                Util.ajax(url, function (res) {
+                    currentPagelet = pageletRequestID;
                     // if the page url has been moved.
                     if (currentPageUrl !== location.href) {
                         return;
@@ -505,5 +514,6 @@
     }();
 
     Event.mixto(BigPipe);
+    BigPipe.ignoreDuplicate = true;
     window.BigPipe = BigPipe;
 })(this);

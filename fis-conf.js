@@ -3,7 +3,7 @@
  * @author
  */
 
-fis.config.set('namespace', 'home');
+fis.config.set('namespace', '{{-app_name-}}');
 
 // chrome下可以安装插件实现livereload功能
 // https://chrome.google.com/webstore/detail/livereload/jnihajbhpnppcggbcgedagnkighmdlei

@@ -74,14 +74,17 @@
             link.onreadystatechange = function () {
                 /loaded|complete/.test(link.readyState) && cb();
             }
-        } else if (browser === 'opera') {
+        }
+        else if (browser === 'opera') {
             link.onload = cb;
-        } else {
+        }
+        else {
             // FF, Safari, Chrome
             (function () {
                 try {
                     link.sheet.cssRule;
-                } catch (e) {
+                }
+                catch (e) {
                     setTimeout(arguments.callee, 20);
                     return;
                 }
@@ -112,7 +115,8 @@
                 script = document.createElement('script');
                 script.text = code;
                 head.appendChild(script).parentNode.removeChild(script);
-            } else {
+            }
+            else {
                 eval(code);
             }
         }
@@ -311,7 +315,8 @@
                             --remaining || insertDom();
                         });
                     }
-                } else {
+                }
+                else {
                     insertDom();
                 }
             };
@@ -336,7 +341,8 @@
                     while (temp.firstChild) {
                         dom.appendChild(temp.firstChild);
                     }
-                } else {
+                }
+                else {
                     dom.innerHTML = data.html;
                 }
 
@@ -458,7 +464,8 @@
                     obj = {
                         pagelets: pagelets
                     };
-                } else {
+                }
+                else {
                     obj = typeof pagelets === 'string' ? {
                         pagelets: pagelets
                     } : pagelets;
@@ -475,6 +482,7 @@
                     container = obj.container && obj.container[id] || obj.container;
                     containers[id] = container;
                 }
+                args.push('reqID=' + pageletRequestID);
 
                 function onPageArrive(data) {
                     var id = data.id;
@@ -486,11 +494,13 @@
                 obj.search && args.push(obj.search);
                 if (obj.url) {
                     url = obj.url + (obj.url.indexOf('?') === -1 ? '?' : '&') + args.join('&');
-                } else {
+                }
+                else {
                     url = (location.search ? location.search + '&' : '?') + args.join('&');
                 }
-                BigPipe.on('pageletdone', function () {
-                    if (currentPagelet === pageletRequestID) {
+                BigPipe.on('pageletdone', function (pagelet, res) {
+                    // !res.reqID 用于兼容老版本未返回reqID的情况
+                    if (res.reqID === undefined || res.reqID === pageletRequestID) {
                         remaining--;
                         if (remaining === 0) {
                             BigPipe.off('pageletdone', arguments.callee);
@@ -501,7 +511,6 @@
                 });
 
                 Util.ajax(url, function (res) {
-                    currentPagelet = pageletRequestID;
                     // if the page url has been moved.
                     if (currentPageUrl !== location.href) {
                         return;

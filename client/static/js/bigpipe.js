@@ -469,6 +469,7 @@
             // params:
             //   - pagelets       pagelet id or array of pagelet id.
             //   - param          extra params for the ajax call.
+            //   - search         replace location.search for the ajax call, without '?'.
             //   - container      by default, the pagelet will be rendered in
             //                    some document node with the same id. With this
             //                    option the pagelet can be renndered in
@@ -524,11 +525,17 @@
 
                 BigPipe.on('pageletarrive', onPageArrive);
                 obj.search && args.push(obj.search);
+                obj.param && args.push(obj.param);
                 if (obj.url) {
                     url = obj.url + (obj.url.indexOf('?') === -1 ? '?' : '&') + args.join('&');
                 }
                 else {
-                    url = (location.search ? location.search + '&' : '?') + args.join('&');
+                    if (!obj.search) {
+                        url = (location.search ? location.search + '&' : '?') + args.join('&');
+                    }
+                    else {
+                        url = '?' + args.join('&');
+                    }
                 }
                 BigPipe.on('pageletdone', function (pagelet, res) {
                     // !res.reqID 用于兼容老版本未返回reqID的情况

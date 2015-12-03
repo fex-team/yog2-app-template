@@ -136,7 +136,12 @@
 
         xhr.onreadystatechange = function () {
             if (this.readyState == 4) {
-                cb(this.responseText);
+                if (this.status !== 200) {
+                    cb(this.responseText);
+                }
+                else {
+                    cb(null, this.responseText);
+                }
             }
         };
         xhr.open(data ? 'POST' : 'GET', url + '&t=' + (new Date()).getTime(), true);
@@ -560,7 +565,10 @@
                     Util.globalEval(requestCache.content);
                 }
                 else {
-                    Util.ajax(url, function (res) {
+                    Util.ajax(url, function (err, res) {
+                        if (err) {
+                            return obj.cb && obj.cb(err);
+                        }
                         // if the page url has been moved.
                         if (currentPageUrl !== location.href) {
                             return;

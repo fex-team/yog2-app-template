@@ -34,7 +34,6 @@ BigPipe.onPageletArrive({"container":"pages-container","id":"spage","html":"cont
 ```javascript  
 BigPipe.load('pageletId');
 
-BigPipe.load('pageletId1 pageletId2 pagelet Id3');
 
 BigPipe.load({
     pagelets: ['pageletId1', 'pageletId2']

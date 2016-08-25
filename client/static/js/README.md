@@ -50,7 +50,7 @@ BigPipe.load({
 
 参数说明
 
-* `pagelets` pagelets 的 id 列表，可以是单个 pagelet， 也可以是多个用空格隔开，或者直接就是一个数组，里面由 pagelet id 组成。
+* `pagelets` pagelets 的 id 列表，可以是单个 pagelet， 也可以是一个数组，里面由 pagelet id 组成。
 * `url` 页面地址，默认是从当前页面去加载 pagelet，有时你可能需要加载其他页面的 pagelet。
 * `param` 附带参数内容。
 * `cacheID` pagelet 请求的缓存ID，不设置则请求不会被缓存。

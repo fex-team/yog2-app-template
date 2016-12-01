@@ -1,3 +1,10 @@
+/**
+* @file BigPipe前端SDK
+* @version 1.0
+*/
+
+/* eslint-disable */
+
 (function (root) {
     // BigPipe 依赖的各种处理器
     // 可以通过此部分换成 [lazyrender](https://github.com/rgrove/lazyload/)，
@@ -49,7 +56,9 @@
         script.setAttribute('src', url);
         script.setAttribute('type', 'text/javascript');
         script.onload = script.onerror = wrap;
-        script.onreadystatechange = wrap;
+        script.onreadystatechange = function () {
+            /loaded|complete/.test(script.readyState) && wrap();
+        };
         head.appendChild(script);
     }
 
@@ -70,13 +79,24 @@
         link.rel = 'stylesheet';
         link.href = url;
 
+        function onCssLoaded() {
+            loadedRes[url] = true;
+            if (ignoreDuplicate) {
+                for (var i = 0; i < loadingRes[url].length; i++) {
+                    loadingRes[url][i] && loadingRes[url][i]();
+                }
+                loadingRes[url] = null;
+            }
+            cb();
+        }
+
         if (browser === 'msie') {
             link.onreadystatechange = function () {
-                /loaded|complete/.test(link.readyState) && cb();
+                /loaded|complete/.test(link.readyState) && onCssLoaded();
             }
         }
         else if (browser === 'opera') {
-            link.onload = cb;
+            link.onload = onCssLoaded;
         }
         else {
             // FF, Safari, Chrome
@@ -88,14 +108,7 @@
                     setTimeout(arguments.callee, 20);
                     return;
                 }
-                loadedRes[url] = true;
-                if (ignoreDuplicate) {
-                    for (var i = 0; i < loadingRes[url].length; i++) {
-                        loadingRes[url][i] && loadingRes[url][i]();
-                    }
-                    loadingRes[url] = null;
-                }
-                cb();
+                onCssLoaded();
             })();
         }
 
@@ -108,9 +121,9 @@
     function globalEval(code) {
         var script;
 
-        code = code.replace(/^\s+/, '').replace(/\s+$/, '');
-
         if (code) {
+            code = code.replace(/^\s+/, '').replace(/\s+$/, '');
+
             if (code.indexOf('use strict') === 1) {
                 script = document.createElement('script');
                 script.text = code;
@@ -440,7 +453,7 @@
 
         var count = 0,
             pagelets = [],
-            /* registered pagelets */
+        /* registered pagelets */
             currReqID = null,
             resourceChecked = false,
             cache = {},
@@ -534,7 +547,7 @@
                     } : pagelets;
                     pagelets = obj.pagelet || obj.pagelets;
                     typeof pagelets === 'string' &&
-                        (pagelets = pagelets.split(/\s*,\s*/));
+                    (pagelets = pagelets.split(/\s*,\s*/));
                 }
 
                 for (i = pagelets.length - 1; i >= 0; i--) {
@@ -547,7 +560,7 @@
 
                 function onPageArrive(data) {
                     // !data.reqID 用于兼容老版本未返回reqID的情况
-                    if (data.reqID === undefined || data.reqID === pageletRequestID) {
+                    if (data.reqID === undefined || data.reqID === null || data.reqID === pageletRequestID) {
                         var id = data.id;
                         // console.log('req', data.reqID, 'pagelet', data.id, 'arrive');
                         remaining++;
